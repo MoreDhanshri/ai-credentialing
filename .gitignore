@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+pptx-gen/node_modules/
+credentialing-ai-demo/node_modules/

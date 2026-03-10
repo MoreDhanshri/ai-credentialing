@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "credentialing-ai-demo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "credentialing-ai-demo"],
+      "port": 5173
+    }
+  ]
+}
