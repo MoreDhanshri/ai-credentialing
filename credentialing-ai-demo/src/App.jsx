@@ -22,16 +22,15 @@ function Overview({ setTab }) {
     { label: 'Credentialing Time', before: '90–120 days', after: '2–5 days', icon: '⚡', color: '#3b82f6' },
     { label: 'Automation Rate', before: '0% automated', after: '70% zero-touch', icon: '🤖', color: '#10b981' },
     { label: 'Directory Accuracy', before: '~28% accurate', after: '91%+ accurate', icon: '✓', color: '#8b5cf6' },
-    { label: 'Annual Value (MCO)', before: 'Status quo', after: '$100M+ opportunity', icon: '$', color: '#f59e0b' },
   ]
 
   const flows = [
-    { step: '01', title: 'Document Intake', desc: 'AI extracts data from any document type — licenses, diplomas, CAQH exports, faxed PDFs — in seconds.', color: '#3b82f6', tab: 'intake' },
-    { step: '02', title: 'Parallel PSV', desc: 'Autonomous agents verify across 3,200+ sources simultaneously. What took weeks now completes in hours.', color: '#06b6d4', tab: 'psv' },
-    { step: '03', title: 'Live Monitoring', desc: 'Always-on surveillance for exclusions, license lapses, and sanctions. Alerts within minutes of changes.', color: '#10b981', tab: 'monitor' },
-    { step: '04', title: 'Directory Accuracy', desc: 'ML models cross-reference claims data to detect ghost providers before regulators do.', color: '#8b5cf6', tab: 'directory' },
-    { step: '05', title: 'AI Committee Packets', desc: 'LLMs synthesize PSV results, malpractice history, and risk signals into committee-ready narratives.', color: '#f59e0b', tab: 'committee' },
-    { step: '06', title: 'ROI Analytics', desc: 'Track time savings, compliance risk avoidance, and revenue impact across 20+ states in real time.', color: '#ef4444', tab: 'analytics' },
+    { step: '01', title: 'Eligibility Assessment', desc: 'Assess whether a provider needs full credentialing. Route delegated, already-credentialed, or no-app cases to Sanctions Monitoring and close out appropriately.', color: '#3b82f6', tab: 'monitor' },
+    { step: '02', title: 'Auto Intake & AI Completeness', desc: 'Auto-pull CAQH application and roster. Check NCD eligibility via FMF. AI evaluates application completeness in real-time — loops back until complete.', color: '#06b6d4', tab: 'intake' },
+    { step: '03', title: 'AI-Powered Verification (PSV)', desc: 'AI determines verification scope, executes primary source API queries, analyzes results, produces a structured checklist and summarizes findings.', color: '#10b981', tab: 'psv' },
+    { step: '04', title: 'Level Assignment & Routing', desc: 'Assign case level based on AI findings: Clean (L1) → QA Review, Level 2 → PRC Process with issue packet, Level 4 → MD + PRC full review with concern summary.', color: '#8b5cf6', tab: 'committee' },
+    { step: '05', title: 'QA Review & MD Approval', desc: 'QA validates completeness for clean cases. Prepared packets highlight issues or concerns. MD reviews and approves or rejects. Final credentialing decision logged.', color: '#f59e0b', tab: 'committee' },
+    { step: '06', title: 'Directory & Ongoing Monitoring', desc: 'Post-credentialing: ensure directory accuracy, detect ghost providers via ML, and monitor continuously for sanctions, expirations, and NPDB changes.', color: '#ef4444', tab: 'directory' },
   ]
 
   return (
@@ -47,7 +46,7 @@ function Overview({ setTab }) {
         </h1>
         <p style={{ fontSize: 18, color: '#94a3b8', maxWidth: 640, margin: '0 auto 32px', lineHeight: 1.6 }}>
           AI transforms the 90–120 day credentialing bottleneck into a 2–5 day intelligent workflow —
-          protecting $100M+ in annual value across Molina's 5.8M members.
+          reducing risk, accelerating provider access, and ensuring directory accuracy across Molina's 5.8M members.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-primary btn-lg" onClick={() => setTab('intake')}>
@@ -60,7 +59,7 @@ function Overview({ setTab }) {
       </div>
 
       {/* Metrics */}
-      <div className="grid-4" style={{ marginBottom: 48 }}>
+      <div className="grid-3" style={{ marginBottom: 48 }}>
         {metrics.map(m => (
           <div key={m.label} className="card" style={{ borderColor: `${m.color}22`, background: `linear-gradient(135deg, #0f172a, ${m.color}08)` }}>
             <div style={{ fontSize: 28, marginBottom: 12, color: m.color, fontWeight: 800 }}>{m.icon}</div>
@@ -73,8 +72,8 @@ function Overview({ setTab }) {
 
       {/* Flow */}
       <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>End-to-End AI Credentialing Flow</h2>
-        <p style={{ color: '#64748b', fontSize: 14 }}>Click any step to explore the interactive demo</p>
+        <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>End-to-End AI Credentialing Workflow</h2>
+        <p style={{ color: '#64748b', fontSize: 14 }}>From eligibility assessment through approval — click any step to explore the interactive demo</p>
       </div>
       <div className="grid-3">
         {flows.map(f => (
