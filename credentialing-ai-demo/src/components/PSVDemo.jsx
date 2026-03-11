@@ -1,4 +1,15 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
+
+const VERIFY_SCOPE = [
+  'State medical license — all practice states (CA, TX, NV)',
+  'DEA registration and schedule authority',
+  'Board certification and MOC status',
+  'NPDB continuous query',
+  'Federal and state exclusion databases (56 lists)',
+  'Malpractice insurance and claims history',
+  'Hospital privileges — all active facilities',
+  'Medicare/Medicaid enrollment (PECOS)',
+]
 
 const AGENTS = [
   {
@@ -86,12 +97,10 @@ function AgentCard({ agent, state }) {
         <span className={`badge ${status.cls}`}>{status.label}</span>
       </div>
 
-      {/* Sources */}
       <div style={{ fontSize: 11, color: '#475569', marginBottom: 8 }}>
         Querying {agent.totalSources} source{agent.totalSources > 1 ? 's' : ''}: {agent.sources.slice(0,2).join(', ')}{agent.sources.length > 2 ? '…' : ''}
       </div>
 
-      {/* Progress */}
       {state?.phase === 'running' && (
         <div style={{ marginBottom: 8 }}>
           <div className="progress">
@@ -103,14 +112,12 @@ function AgentCard({ agent, state }) {
         </div>
       )}
 
-      {/* Result */}
       {state?.result && (
         <div style={{ fontSize: 11, color: state.result.risk === 'low' ? '#6ee7b7' : '#fbbf24', marginTop: 4, lineHeight: 1.5 }}>
           {state.result.detail}
         </div>
       )}
 
-      {/* Time */}
       {state?.elapsed && (
         <div style={{ fontSize: 10, color: '#334155', marginTop: 6 }}>
           Completed in {state.elapsed}s
@@ -122,70 +129,80 @@ function AgentCard({ agent, state }) {
 
 export default function PSVDemo() {
   const [agentStates, setAgentStates] = useState({})
-  const [phase, setPhase] = useState('idle') // idle | running | complete
+  const [phase, setPhase] = useState('idle') // idle | determining | running | complete
+  const [scopeVisible, setScopeVisible] = useState(0)
   const [totalTime, setTotalTime] = useState(0)
   const [manualDays] = useState(18)
-  const timerRef = useRef(null)
 
   const runPSV = () => {
-    setPhase('running')
+    setPhase('determining')
+    setScopeVisible(0)
     setAgentStates({})
-    const startTime = Date.now()
+    setTotalTime(0)
 
-    // Initialize all as queued
-    const initialStates = {}
-    AGENTS.forEach(a => { initialStates[a.id] = { phase: 'queued', progress: 0 } })
-    setAgentStates(initialStates)
-
-    // Stagger agent starts
-    AGENTS.forEach((agent, idx) => {
-      const startDelay = Math.random() * 600 + idx * 150
-
-      setTimeout(() => {
-        const sources = agent.sources
-        let sourceIdx = 0
-        let progress = 0
-
-        setAgentStates(prev => ({ ...prev, [agent.id]: { phase: 'running', progress: 0, currentSource: sources[0] } }))
-
-        const interval = setInterval(() => {
-          progress += Math.random() * 12 + 6
-          sourceIdx = Math.min(Math.floor((progress / 100) * sources.length), sources.length - 1)
-
-          if (progress >= 100) {
-            clearInterval(interval)
-            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
-            setAgentStates(prev => ({
-              ...prev,
-              [agent.id]: { phase: 'done', progress: 100, result: agent.result, elapsed }
-            }))
-
-            // Check if all done
-            setTimeout(() => {
-              setAgentStates(prev => {
-                const allDone = Object.values(prev).every(s => s.phase === 'done')
-                if (allDone) {
-                  setPhase('complete')
-                  setTotalTime(((Date.now() - startTime) / 1000).toFixed(1))
-                }
-                return prev
-              })
-            }, 200)
-          } else {
-            setAgentStates(prev => ({
-              ...prev,
-              [agent.id]: { ...prev[agent.id], progress: Math.min(progress, 99), currentSource: sources[sourceIdx] }
-            }))
-          }
-        }, 120 + Math.random() * 60)
-      }, startDelay)
+    // Reveal scope items one by one
+    VERIFY_SCOPE.forEach((_, i) => {
+      setTimeout(() => setScopeVisible(i + 1), (i + 1) * 350)
     })
+
+    // After scope is shown, deploy agents
+    const SCOPE_DONE = VERIFY_SCOPE.length * 350 + 800
+    setTimeout(() => {
+      setPhase('running')
+      const startTime = Date.now()
+
+      const initialStates = {}
+      AGENTS.forEach(a => { initialStates[a.id] = { phase: 'queued', progress: 0 } })
+      setAgentStates(initialStates)
+
+      AGENTS.forEach((agent, idx) => {
+        const startDelay = Math.random() * 600 + idx * 150
+        setTimeout(() => {
+          const sources = agent.sources
+          let sourceIdx = 0
+          let progress = 0
+
+          setAgentStates(prev => ({ ...prev, [agent.id]: { phase: 'running', progress: 0, currentSource: sources[0] } }))
+
+          const interval = setInterval(() => {
+            progress += Math.random() * 12 + 6
+            sourceIdx = Math.min(Math.floor((progress / 100) * sources.length), sources.length - 1)
+
+            if (progress >= 100) {
+              clearInterval(interval)
+              const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
+              setAgentStates(prev => ({
+                ...prev,
+                [agent.id]: { phase: 'done', progress: 100, result: agent.result, elapsed }
+              }))
+
+              setTimeout(() => {
+                setAgentStates(prev => {
+                  const allDone = Object.values(prev).every(s => s.phase === 'done')
+                  if (allDone) {
+                    setPhase('complete')
+                    setTotalTime(((Date.now() - startTime) / 1000).toFixed(1))
+                  }
+                  return prev
+                })
+              }, 200)
+            } else {
+              setAgentStates(prev => ({
+                ...prev,
+                [agent.id]: { ...prev[agent.id], progress: Math.min(progress, 99), currentSource: sources[sourceIdx] }
+              }))
+            }
+          }, 120 + Math.random() * 60)
+        }, startDelay)
+      })
+    }, SCOPE_DONE)
   }
 
   const reset = () => {
     setPhase('idle')
     setAgentStates({})
     setTotalTime(0)
+    setScopeVisible(0)
   }
 
   const doneCount = Object.values(agentStates).filter(s => s.phase === 'done').length
@@ -199,15 +216,14 @@ export default function PSVDemo() {
           <div style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', borderRadius: 10, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⚡</div>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700 }}>PSV Agent Swarm</h1>
-            <p style={{ color: '#64748b', fontSize: 13 }}>8 autonomous agents verify across 70+ sources simultaneously</p>
+            <p style={{ color: '#64748b', fontSize: 13 }}>AI determines verification scope → deploys 8 specialist agents in parallel → produces checklist for human review</p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
+          <span className="badge badge-purple">AI Scope Analysis</span>
           <span className="badge badge-info">3,200+ Verification Types</span>
           <span className="badge badge-success">Parallel Processing</span>
-          <span className="badge badge-warning">CAPTCHA-Resistant</span>
-          <span className="badge badge-purple">Step-by-Step Audit Trail</span>
-          <span className="badge badge-cyan">&gt;97% Success Rate</span>
+          <span className="badge badge-cyan">Step-by-Step Audit Trail</span>
         </div>
       </div>
 
@@ -216,7 +232,7 @@ export default function PSVDemo() {
         {[
           { label: 'Manual PSV Time', value: `${manualDays} days`, color: '#ef4444' },
           { label: 'AI PSV Time', value: phase === 'complete' ? `${totalTime}s` : '< 4 hrs', color: '#10b981' },
-          { label: 'Agents Running', value: runningCount.toString(), color: '#3b82f6' },
+          { label: 'Agents Running', value: phase === 'determining' ? '—' : runningCount.toString(), color: '#3b82f6' },
           { label: 'Sources Verified', value: phase === 'complete' ? '70+' : doneCount > 0 ? `${doneCount * 9}` : '0', color: '#8b5cf6' },
         ].map(s => (
           <div key={s.label} className="card" style={{ textAlign: 'center', borderColor: `${s.color}20` }}>
@@ -236,24 +252,60 @@ export default function PSVDemo() {
           </div>
           <div style={{ textAlign: 'right' }}>
             {phase === 'idle' && <span className="badge badge-ghost">Awaiting PSV</span>}
+            {phase === 'determining' && <span className="badge badge-purple"><span className="spinner" style={{width:10,height:10}} /> Analyzing Scope</span>}
             {phase === 'running' && <span className="badge badge-info"><span className="spinner" style={{width:10,height:10}} /> In Progress</span>}
             {phase === 'complete' && <span className="badge badge-success">✓ PSV Complete</span>}
           </div>
         </div>
       </div>
 
-      {/* Agents grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-        {AGENTS.map(agent => (
-          <AgentCard key={agent.id} agent={agent} state={agentStates[agent.id]} />
-        ))}
-      </div>
+      {/* AI Determining Scope */}
+      {(phase === 'determining' || phase === 'running' || phase === 'complete') && (
+        <div className="card" style={{ marginBottom: 20, borderColor: 'rgba(139,92,246,.2)', background: 'rgba(139,92,246,.03)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#a78bfa', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.5px' }}>
+            AI: Determining Verification Scope
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            {VERIFY_SCOPE.slice(0, scopeVisible).map((item, i) => (
+              <div key={i} className="animate-in" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#94a3b8' }}>
+                <span style={{ color: '#10b981', flexShrink: 0 }}>✓</span>
+                <span>{item}</span>
+              </div>
+            ))}
+            {phase === 'determining' && scopeVisible < VERIFY_SCOPE.length && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#8b5cf6' }}>
+                <span className="spinner" />
+                <span>Analyzing provider profile…</span>
+              </div>
+            )}
+          </div>
+          {(phase === 'running' || phase === 'complete') && scopeVisible >= VERIFY_SCOPE.length && (
+            <div style={{ marginTop: 10, fontSize: 11, color: '#10b981' }}>
+              ✓ Scope confirmed — {VERIFY_SCOPE.length} verification domains identified · Deploying agents in parallel
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Controls + result */}
+      {/* Agents grid */}
+      {(phase === 'running' || phase === 'complete') && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+          {AGENTS.map(agent => (
+            <AgentCard key={agent.id} agent={agent} state={agentStates[agent.id]} />
+          ))}
+        </div>
+      )}
+
+      {/* Controls */}
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         {phase === 'idle' && (
           <button className="btn btn-primary btn-lg" onClick={runPSV}>
             ⚡ Deploy All Agents
+          </button>
+        )}
+        {phase === 'determining' && (
+          <button className="btn btn-outline btn-lg" disabled>
+            <span className="spinner" /> Analyzing verification scope…
           </button>
         )}
         {phase === 'running' && (
@@ -264,7 +316,7 @@ export default function PSVDemo() {
         {phase === 'complete' && (
           <>
             <button className="btn btn-success btn-lg">
-              ✓ Forward to Committee Prep
+              ✓ Forward to Human Review — Assign & Evaluate
             </button>
             <button className="btn btn-ghost" onClick={reset}>↺ Reset</button>
           </>
@@ -282,8 +334,33 @@ export default function PSVDemo() {
         )}
       </div>
 
-      {/* Legend */}
-      {phase !== 'idle' && (
+      {/* Assign & Evaluate Handoff */}
+      {phase === 'complete' && (
+        <div className="animate-in card" style={{ marginTop: 20, borderColor: 'rgba(59,130,246,.25)', background: 'rgba(59,130,246,.04)' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#60a5fa', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.5px' }}>
+            Assign & Evaluate — Human Handoff
+          </div>
+          <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 12 }}>
+            PSV complete across all 8 verification domains. AI has produced a verification checklist and summary.
+            Route to credentialing specialist for review and routing decision.
+          </div>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Overall Risk', value: '⚠ Medium (1 flag)', color: '#f59e0b' },
+              { label: 'Domains Verified', value: '8 / 8', color: '#10b981' },
+              { label: 'AI Routing Suggestion', value: 'L3 — PRC Review', color: '#8b5cf6' },
+            ].map(s => (
+              <div key={s.label} style={{ flex: 1, minWidth: 120 }}>
+                <div style={{ fontSize: 11, color: '#475569', marginBottom: 3 }}>{s.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Audit trail */}
+      {(phase === 'running' || phase === 'complete') && Object.keys(agentStates).length > 0 && (
         <div style={{ marginTop: 20, padding: 14, background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10 }}>
           <div style={{ fontSize: 11, color: '#475569', marginBottom: 8, fontWeight: 600 }}>AGENT DECISION LOG (AUDIT TRAIL)</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, maxHeight: 160, overflow: 'auto' }}>

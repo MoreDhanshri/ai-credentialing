@@ -9,11 +9,11 @@ import AnalyticsDashboard from './components/AnalyticsDashboard'
 
 const NAV = [
   { id: 'overview', label: 'Command Center', icon: '⬡', desc: 'Platform overview' },
-  { id: 'intake',   label: 'AI Intake',       icon: '⬡', desc: 'Document extraction' },
-  { id: 'psv',      label: 'PSV Agents',      icon: '⬡', desc: 'Primary verification' },
+  { id: 'intake',   label: 'Portal & Intake',  icon: '⬡', desc: 'Assess · CAQH pull · Completeness' },
+  { id: 'psv',      label: 'PSV Agents',      icon: '⬡', desc: 'AI scope + parallel PSV' },
   { id: 'monitor',  label: 'Live Monitoring', icon: '⬡', desc: 'Real-time alerts' },
   { id: 'directory',label: 'Directory AI',    icon: '⬡', desc: 'Ghost network detection' },
-  { id: 'committee',label: 'Committee AI',    icon: '⬡', desc: 'Packet generation' },
+  { id: 'committee',label: 'Review & Routing', icon: '⬡', desc: 'L3/L4 routing · QA · packets' },
   { id: 'analytics',label: 'ROI Analytics',   icon: '⬡', desc: 'Impact measurement' },
 ]
 
@@ -22,7 +22,7 @@ function Overview({ setTab }) {
     { label: 'Credentialing Time', before: '90–120 days', after: '2–5 days', icon: '⚡', color: '#3b82f6' },
     { label: 'Automation Rate', before: '0% automated', after: '70% zero-touch', icon: '🤖', color: '#10b981' },
     { label: 'Directory Accuracy', before: '~28% accurate', after: '91%+ accurate', icon: '✓', color: '#8b5cf6' },
-    { label: 'Annual Value (MCO)', before: 'Status quo', after: '$$ cost saving opportunity', icon: '$', color: '#f59e0b' },
+    { label: 'Annual Value (MCO)', before: 'Status quo', after: '$ cost saving opportunity', icon: '$', color: '#f59e0b' },
   ]
 
   const flows = [
@@ -43,7 +43,7 @@ function Overview({ setTab }) {
           <span style={{ fontSize: 12, color: '#60a5fa', fontWeight: 600 }}>LIVE DEMO — MOLINA HEALTHCARE AI CREDENTIALING PLATFORM</span>
         </div>
         <h1 style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1, marginBottom: 16, background: 'linear-gradient(135deg, #e2e8f0 0%, #60a5fa 50%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          The Future of Provider<br />Credentialing Is Autonomous
+          The Future of<br />Credentialing Is Autonomous
         </h1>
         <p style={{ fontSize: 18, color: '#94a3b8', maxWidth: 640, margin: '0 auto 32px', lineHeight: 1.6 }}>
           AI transforms the 90–120 day credentialing bottleneck into a 2–5 day intelligent workflow —

@@ -22,14 +22,15 @@ const PSV_DATA = {
   references: '3/3 positive responses received — colleagues rate as "excellent" or "outstanding"',
 }
 
-const GENERATED_NARRATIVE = `CREDENTIALING COMMITTEE PACKET — CONFIDENTIAL
+const GENERATED_NARRATIVE = `CREDENTIALING COMMITTEE PACKET — L3: PRC REVIEW — CONFIDENTIAL
 Provider: Dr. Michael Torres, MD | Specialty: Orthopedic Surgery | Date: ${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}
+Routing: L3 — Peer Review Committee Process
 
 ═══════════════════════════════════════════════
 
-EXECUTIVE SUMMARY — AI RISK ASSESSMENT: MEDIUM (REQUIRES COMMITTEE REVIEW)
+EXECUTIVE SUMMARY — AI RISK ASSESSMENT: MEDIUM (L3 — PRC REVIEW)
 
-Dr. Torres presents a strong overall credential profile for an experienced orthopedic surgeon with 14 years of practice. Two closed malpractice claims require committee consideration, though both fall within statistically normal ranges for the specialty. No exclusions, sanctions, or licensing issues were identified. Committee approval is recommended with standard 12-month enhanced claims monitoring.
+Dr. Torres presents a strong overall credential profile for an experienced orthopedic surgeon with 14 years of practice. Two closed malpractice claims require PRC consideration, though both fall within statistically normal ranges for the specialty. No exclusions, sanctions, or licensing issues were identified. AI routing: L3 — PRC review with packet highlighting flagged items.
 
 ═══════════════════════════════════════════════
 
@@ -41,54 +42,58 @@ Dr. Torres completed his medical degree at UCLA School of Medicine (2006), follo
 
 All licensure and certification status is current and in good standing. California Medical License G77123 is active with no disciplinary history, expiring March 31, 2027. ABOS board certification is current with Maintenance of Certification up to date. DEA registration is active for Schedules II–V.
 
-3. MALPRACTICE HISTORY ⚠ REQUIRES COMMITTEE REVIEW
+3. MALPRACTICE HISTORY ⚠ HIGHLIGHTED FOR PRC REVIEW
 
-NPDB query returned 2 closed reports:
+NPDB query returned 2 closed reports (triggering L3 routing):
 
   • Claim #1 (2019): Alleged incomplete resolution of disk herniation L4-L5. Partial payment $180,000. Provider maintains surgery outcome was within standard of care; settlement was for cost efficiency. Independent review rated causation as "possible but not established."
 
   • Claim #2 (2022): Post-operative infection following total knee arthroplasty. No payment made; claim dismissed. Complication rate consistent with published literature for this procedure type.
 
-AI Risk Analysis: Based on PIAA benchmark data, the orthopedic surgery specialty has a mean of 1.8 claims per 10 years for surgeons with this case volume and procedure mix. Dr. Torres's rate of 2 claims over 14 years is within the expected range. No clustering by procedure type, facility, or patient population that would suggest systemic quality concerns. Risk classification: MEDIUM — routine monitoring recommended.
+AI Risk Analysis: Based on PIAA benchmark data, the orthopedic surgery specialty has a mean of 1.8 claims per 10 years for surgeons with this case volume and procedure mix. Dr. Torres's rate of 2 claims over 14 years is within the expected range. No clustering by procedure type, facility, or patient population that would suggest systemic quality concerns.
 
 4. EXCLUSIONS & SANCTIONS ✓ CLEAR
 
-Comprehensive exclusion search across OIG, SAM.gov, and all 56 state Medicaid exclusion databases returned no results. No state medical board sanctions, no FDA debarment, no OFAC matches. The provider has no history of Medicare or Medicaid billing fraud or abuse findings.
+Comprehensive exclusion search across OIG, SAM.gov, and all 56 state Medicaid exclusion databases returned no results. No state medical board sanctions, no FDA debarment, no OFAC matches.
 
 5. HOSPITAL PRIVILEGES ✓ VERIFIED
 
-Active surgical privileges confirmed at: Cedars-Sinai Medical Center (unrestricted), UCLA Health (unrestricted), Keck Medical Center (unrestricted). No pending or completed privilege revocations or restrictions at any institution. Peer references at all three facilities uniformly positive.
+Active surgical privileges confirmed at: Cedars-Sinai Medical Center (unrestricted), UCLA Health (unrestricted), Keck Medical Center (unrestricted). No pending or completed privilege revocations or restrictions at any institution.
 
 6. PEER REFERENCES ✓ POSITIVE
 
-All three required peer references responded within 10 business days. Ratings: 3/3 "excellent" or "outstanding" for clinical competence, judgment, and interpersonal conduct with patients and colleagues.
+All three required peer references responded. Ratings: 3/3 "excellent" or "outstanding" for clinical competence, judgment, and interpersonal conduct.
 
 ═══════════════════════════════════════════════
 
-COMMITTEE RECOMMENDATION
+ROUTING: L3 — PRC PROCESS
+  ✓ Case routed to Peer Review Committee — 2 NPDB malpractice claims flagged
+  ✓ Packet prepared with highlighted issues for PRC review
+  ✓ AI recommends approval pending PRC sign-off
 
-APPROVE with conditions:
+COMMITTEE RECOMMENDATION — APPROVE with conditions:
   ✓ Standard 36-month re-credentialing cycle
   ✓ 12-month enhanced claims monitoring (flag any new malpractice filings)
   ✓ DEA registration renewal reminder at 6 months prior to expiration
   ✓ ABOS MOC tracking — board cert renewal December 2026
 
 Prepared by: Molina CredentialAI Platform v2.4 | Review Time: 3.2 seconds
-Human Review Required Before Committee Distribution`
+Human Review Required Before Final Decision`
 
 export default function CommitteeDemo() {
   const [phase, setPhase] = useState('idle') // idle | analyzing | generating | complete
   const [displayedText, setDisplayedText] = useState('')
   const [analysisStep, setAnalysisStep] = useState(0)
   const [riskScore, setRiskScore] = useState(null)
+  const [routingLevel, setRoutingLevel] = useState(null)
   const intervalRef = useRef(null)
 
   const ANALYSIS_STEPS = [
-    { label: 'Ingesting PSV results from 70+ sources…', duration: 900 },
-    { label: 'Analyzing NPDB reports and malpractice patterns…', duration: 1100 },
-    { label: 'Cross-referencing specialty benchmarks (PIAA data)…', duration: 900 },
-    { label: 'Scoring risk against NCQA CR criteria…', duration: 700 },
-    { label: 'Drafting committee narrative…', duration: 600 },
+    { label: 'Ingesting PSV results and verification checklist…', duration: 900 },
+    { label: 'Analyzing NPDB reports — 2 flagged items identified…', duration: 1100 },
+    { label: 'Assigning review level: L3 (PRC Process)…', duration: 800 },
+    { label: 'Identifying issues for packet highlighting…', duration: 900 },
+    { label: 'Generating committee-ready narrative…', duration: 600 },
   ]
 
   const runGeneration = () => {
@@ -96,13 +101,13 @@ export default function CommitteeDemo() {
     setAnalysisStep(0)
     setDisplayedText('')
     setRiskScore(null)
+    setRoutingLevel(null)
 
     let stepIdx = 0
     const runStep = () => {
       if (stepIdx >= ANALYSIS_STEPS.length) {
         setPhase('generating')
         setRiskScore('MEDIUM')
-        // Type the narrative
         let charIdx = 0
         intervalRef.current = setInterval(() => {
           charIdx += Math.floor(Math.random() * 12) + 6
@@ -116,6 +121,9 @@ export default function CommitteeDemo() {
         return
       }
       setAnalysisStep(stepIdx)
+      if (stepIdx === 2) {
+        setTimeout(() => setRoutingLevel('L3'), 500)
+      }
       stepIdx++
       setTimeout(runStep, ANALYSIS_STEPS[stepIdx - 1]?.duration || 800)
     }
@@ -128,6 +136,7 @@ export default function CommitteeDemo() {
     setDisplayedText('')
     setAnalysisStep(0)
     setRiskScore(null)
+    setRoutingLevel(null)
   }
 
   useEffect(() => () => clearInterval(intervalRef.current), [])
@@ -138,20 +147,20 @@ export default function CommitteeDemo() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <div style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)', borderRadius: 10, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>✦</div>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700 }}>AI Committee Packet Generator</h1>
-            <p style={{ color: '#64748b', fontSize: 13 }}>LLM synthesizes PSV results, malpractice history, and risk signals into committee-ready narratives</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700 }}>Review Routing & Committee Packets</h1>
+            <p style={{ color: '#64748b', fontSize: 13 }}>AI assigns L3/L4 review level → routes to PRC or MD → generates packet highlighting flagged items</p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 12, flexWrap: 'wrap' }}>
-          <span className="badge badge-warning">LLM-Powered Synthesis</span>
-          <span className="badge badge-info">3.2s Generation Time</span>
+          <span className="badge badge-warning">L3/L4 AI Routing</span>
+          <span className="badge badge-info">LLM Packet Generation</span>
           <span className="badge badge-purple">NCQA CR 2 Compliant</span>
-          <span className="badge badge-cyan">Human Review Required</span>
+          <span className="badge badge-cyan">QA Review Gate</span>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 24 }}>
-        {/* Left: provider card + inputs */}
+        {/* Left: provider card + routing */}
         <div>
           {/* Provider */}
           <div className="card" style={{ marginBottom: 16, borderColor: 'rgba(245,158,11,.2)', background: 'linear-gradient(135deg, #0f172a, rgba(245,158,11,.03))' }}>
@@ -178,9 +187,9 @@ export default function CommitteeDemo() {
             ))}
           </div>
 
-          {/* PSV inputs */}
+          {/* PSV flags */}
           <div className="card" style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.5px' }}>PSV Data Inputs</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '.5px' }}>PSV Summary</div>
             {Object.entries(PSV_DATA).map(([k, v]) => {
               const labels = { licenseStatus: 'License', npdbHits: 'NPDB Hits', malpractice: 'Malpractice', exclusions: 'Exclusions', boardCert: 'Board Cert', hospitalPrivileges: 'Privileges', dea: 'DEA', references: 'References' }
               const colors = { npdbHits: '#f59e0b', malpractice: '#f59e0b', exclusions: '#10b981', licenseStatus: '#10b981' }
@@ -193,12 +202,30 @@ export default function CommitteeDemo() {
             })}
           </div>
 
+          {/* L3/L4 Routing */}
+          {routingLevel && (
+            <div className="animate-in card" style={{ marginBottom: 16, borderColor: 'rgba(245,158,11,.3)', background: 'rgba(245,158,11,.05)' }}>
+              <div style={{ fontSize: 11, color: '#f59e0b', fontWeight: 700, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.5px' }}>AI Routing Decision</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#fbbf24', marginBottom: 6 }}>L3 — PRC Process</div>
+              <div style={{ fontSize: 12, color: '#92400e', lineHeight: 1.6, marginBottom: 10 }}>
+                2 NPDB hits flagged · Malpractice claims require PRC review · Preparing packet highlighting issues
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span className="badge badge-warning">PRC Review</span>
+                <span className="badge badge-info">Packet Required</span>
+              </div>
+              <div style={{ marginTop: 10, fontSize: 11, color: '#475569' }}>
+                L4 (MD Review) reserved for cases with active sanctions, license restrictions, or pattern of adverse NPDB reports.
+              </div>
+            </div>
+          )}
+
           {/* Risk score */}
           {riskScore && (
             <div className="animate-in card" style={{ borderColor: 'rgba(245,158,11,.25)', background: 'rgba(245,158,11,.05)', textAlign: 'center', padding: 20 }}>
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 6, textTransform: 'uppercase' }}>AI Risk Classification</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b' }}>{riskScore}</div>
-              <div style={{ fontSize: 12, color: '#92400e', marginTop: 4 }}>Committee review required · Enhanced monitoring recommended</div>
+              <div style={{ fontSize: 12, color: '#92400e', marginTop: 4 }}>L3 PRC review required · Enhanced monitoring recommended</div>
             </div>
           )}
         </div>
@@ -216,7 +243,7 @@ export default function CommitteeDemo() {
               )}
               {phase === 'complete' && (
                 <>
-                  <button className="btn btn-success btn-sm">📤 Send to Committee</button>
+                  <button className="btn btn-success btn-sm">📤 QA Reviewed — Send to PRC</button>
                   <button className="btn btn-ghost btn-sm" onClick={reset}>↺</button>
                 </>
               )}
@@ -256,7 +283,7 @@ export default function CommitteeDemo() {
             {phase === 'idle' && (
               <div style={{ textAlign: 'center', padding: '60px 0', color: '#334155', fontFamily: 'Inter, sans-serif' }}>
                 <div style={{ fontSize: 32, marginBottom: 12 }}>✦</div>
-                <div>Click "Generate with AI" to synthesize PSV data into a committee packet</div>
+                <div>Click "Generate with AI" to synthesize PSV data into an L3/L4 routed committee packet</div>
                 <div style={{ fontSize: 11, color: '#1e293b', marginTop: 6 }}>Takes 3–5 seconds vs. 2–3 hours manually</div>
               </div>
             )}
@@ -265,9 +292,11 @@ export default function CommitteeDemo() {
                 {displayedText.split('\n').map((line, i) => {
                   if (line.startsWith('CREDENTIALING COMMITTEE') || line.startsWith('═')) return <span key={i} style={{ color: '#3b82f6' }}>{line}{'\n'}</span>
                   if (line.includes('EXECUTIVE SUMMARY')) return <span key={i} style={{ color: '#f59e0b', fontWeight: 700 }}>{line}{'\n'}</span>
+                  if (line.startsWith('Routing:')) return <span key={i} style={{ color: '#8b5cf6', fontWeight: 600 }}>{line}{'\n'}</span>
                   if (line.match(/^\d\./)) return <span key={i} style={{ color: '#e2e8f0', fontWeight: 600 }}>{line}{'\n'}</span>
                   if (line.includes('✓')) return <span key={i} style={{ color: '#10b981' }}>{line}{'\n'}</span>
                   if (line.includes('⚠')) return <span key={i} style={{ color: '#f59e0b' }}>{line}{'\n'}</span>
+                  if (line.includes('ROUTING:') || line.includes('COMMITTEE RECOMMENDATION')) return <span key={i} style={{ color: '#f59e0b', fontWeight: 700 }}>{line}{'\n'}</span>
                   if (line.includes('APPROVE')) return <span key={i} style={{ color: '#10b981', fontWeight: 700 }}>{line}{'\n'}</span>
                   return <span key={i}>{line}{'\n'}</span>
                 })}
@@ -277,12 +306,24 @@ export default function CommitteeDemo() {
           </div>
 
           {phase === 'complete' && (
-            <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(59,130,246,.08)', border: '1px solid rgba(59,130,246,.2)', borderRadius: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 18 }}>⚠</span>
-              <div style={{ fontSize: 12, color: '#60a5fa' }}>
-                <strong>NCQA CR 2 Compliance:</strong> This AI-generated narrative is for committee preparation only. A licensed physician must review adverse findings before any credentialing decision is finalized. Full audit trail preserved.
+            <>
+              <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(59,130,246,.08)', border: '1px solid rgba(59,130,246,.2)', borderRadius: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
+                <span style={{ fontSize: 18 }}>⚠</span>
+                <div style={{ fontSize: 12, color: '#60a5fa' }}>
+                  <strong>NCQA CR 2 Compliance:</strong> This AI-generated narrative is for committee preparation only. A licensed physician must review adverse findings before any credentialing decision is finalized. Full audit trail preserved.
+                </div>
               </div>
-            </div>
+              <div className="animate-in" style={{ marginTop: 12, padding: '12px 14px', background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.2)', borderRadius: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: 16, color: '#10b981' }}>✓</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981' }}>QA Review Complete</span>
+                  <span className="badge badge-success" style={{ marginLeft: 'auto' }}>Ready for Approval</span>
+                </div>
+                <div style={{ fontSize: 12, color: '#64748b' }}>
+                  Packet reviewed for completeness and NCQA compliance. Routed to PRC for final decision — Approve, Deny, or Defer.
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -90,15 +90,15 @@ export default function IntakeDemo() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <div style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: 10, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>📥</div>
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 700 }}>AI Document Intake</h1>
-            <p style={{ color: '#64748b', fontSize: 13 }}>Intelligent extraction from any document type — no templates required</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700 }}>Portal & AI Intake</h1>
+            <p style={{ color: '#64748b', fontSize: 13 }}>Credentialing need assessment → CAQH auto-pull → MCO eligibility (FME) → AI completeness evaluation</p>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-          <span className="badge badge-info">OCR + NLP Pipeline</span>
-          <span className="badge badge-success">Expert-Level Accuracy</span>
-          <span className="badge badge-purple">Auto Gap Detection</span>
-          <span className="badge badge-cyan">CAQH Integration</span>
+          <span className="badge badge-info">Portal Assessment</span>
+          <span className="badge badge-success">CAQH Auto-Pull</span>
+          <span className="badge badge-purple">MCO Eligibility (FME)</span>
+          <span className="badge badge-cyan">AI Completeness Check</span>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export default function IntakeDemo() {
 
           {/* Document Queue */}
           <div className="card" style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: '#94a3b8' }}>INCOMING DOCUMENT QUEUE</div>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: '#94a3b8' }}>CAQH AUTO-PULLED DOCUMENTS</div>
             {DOCUMENTS.map((doc, i) => (
               <div key={i}
                 onClick={() => setSelectedDoc(i)}
@@ -152,7 +152,7 @@ export default function IntakeDemo() {
           <div style={{ display: 'flex', gap: 8 }}>
             {phase === 'idle' && (
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={runDemo}>
-                ▶ Run AI Extraction
+                ▶ Run Portal Assessment
               </button>
             )}
             {isRunning && (
@@ -163,7 +163,7 @@ export default function IntakeDemo() {
             {phase === 'complete' && (
               <>
                 <button className="btn btn-success" style={{ flex: 1 }}>
-                  ✓ Submit to Credentialing
+                  ✓ Proceed to PSV
                 </button>
                 <button className="btn btn-ghost" onClick={reset}>↺</button>
               </>
@@ -178,9 +178,9 @@ export default function IntakeDemo() {
             <div className="card" style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: '#94a3b8' }}>AI PROCESSING PIPELINE</div>
               {[
-                { label: '1. Ingestion & Classification', key: 'uploading', prog: uploadProgress, color: '#3b82f6' },
-                { label: '2. OCR + Document Scan', key: 'scanning', prog: scanProgress, color: '#06b6d4' },
-                { label: '3. NLP Field Extraction', key: 'extracting', prog: Math.round((extractedCount / EXTRACTED_FIELDS.length) * 100), color: '#8b5cf6' },
+                { label: '1. Portal Assessment + CAQH Auto-Pull', key: 'uploading', prog: uploadProgress, color: '#3b82f6' },
+                { label: '2. MCO Eligibility Check (FME)', key: 'scanning', prog: scanProgress, color: '#06b6d4' },
+                { label: '3. AI Completeness Evaluation', key: 'extracting', prog: Math.round((extractedCount / EXTRACTED_FIELDS.length) * 100), color: '#8b5cf6' },
               ].map(p => {
                 const done = p.key === 'uploading' ? uploadProgress >= 100 :
                              p.key === 'scanning' ? scanProgress >= 100 :
@@ -205,17 +205,35 @@ export default function IntakeDemo() {
             </div>
           )}
 
+          {/* Portal Assessment Result */}
+          {uploadProgress >= 100 && (
+            <div className="animate-in card" style={{ marginBottom: 16, borderColor: 'rgba(16,185,129,.2)', background: 'rgba(16,185,129,.04)' }}>
+              <div style={{ fontSize: 11, color: '#10b981', fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '.5px' }}>Portal Assessment Result</div>
+              {[
+                ['Delegated Agreement', 'Not applicable'],
+                ['Existing Credential on File', 'None found'],
+                ['MCO Eligibility (FME)', 'Confirmed ✓'],
+                ['Decision', 'New credentialing required'],
+              ].map(([k, v]) => (
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
+                  <span style={{ color: '#475569' }}>{k}</span>
+                  <span style={{ color: v.includes('✓') || v === 'Confirmed ✓' ? '#10b981' : '#94a3b8', fontWeight: v === 'New credentialing required' ? 600 : 400 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Extracted fields */}
           <div className="card" style={{ maxHeight: 420, overflow: 'auto' }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
-              <span>EXTRACTED DATA</span>
+              <span>COMPLETENESS EVALUATION</span>
               {extractedCount > 0 && <span style={{ color: '#10b981', fontWeight: 700 }}>{extractedCount}/{EXTRACTED_FIELDS.length} fields</span>}
             </div>
 
             {phase === 'idle' && (
               <div style={{ textAlign: 'center', padding: '32px 0', color: '#334155' }}>
                 <div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>
-                <div style={{ fontSize: 13 }}>Click "Run AI Extraction" to see intelligent field extraction</div>
+                <div style={{ fontSize: 13 }}>Click "Run Portal Assessment" to see the full intake flow</div>
               </div>
             )}
 
@@ -258,7 +276,7 @@ export default function IntakeDemo() {
                 </div>
               ))}
               <div style={{ marginTop: 10, padding: '8px 10px', background: 'rgba(16,185,129,.05)', borderRadius: 8, border: '1px solid rgba(16,185,129,.12)' }}>
-                <span style={{ fontSize: 12, color: '#10b981' }}>✓ 12 of 14 required fields complete · Application queued for PSV agents</span>
+                <span style={{ fontSize: 12, color: '#10b981' }}>✓ 12 of 14 required fields complete · AI evaluation: Complete — Ready to proceed to PSV</span>
               </div>
             </div>
           )}
